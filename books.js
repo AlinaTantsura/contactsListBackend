@@ -1,4 +1,4 @@
-[
+module.exports = [
   {
     "id": "1",
     "title": "Eloquent JavaScript, Third Edition",
