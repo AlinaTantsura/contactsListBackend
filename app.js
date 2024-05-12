@@ -1,48 +1,42 @@
-const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs/promises')
-const crypto = require('crypto')
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import mongoose from 'mongoose'
 
-const app = express();
+import contactsRouter from "./routes/contactsRouter.js";
+import 'dotenv/config';
+import { authRouter } from "./routes/auth.js";
 
+
+const { DB_HOST, PORT } = process.env;
+
+export const app = express();
+
+app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'))
+app.use(express.static("public"))
 
-const tempDir = path.join(__dirname, 'temp');
-const bookDir = path.join(__dirname, "public", "books");
-const multerConfig = multer.diskStorage({
-    destination: tempDir,
-    filename: (req, file, cb) => {
-        cb(null, file.originalname)
-    }
+app.use("/api/users", authRouter)
+app.use("/api/contacts", contactsRouter);
+
+app.use((_, res) => {
+  res.status(404).json({ message: "Route not found" });
 });
 
-const upload = multer({
-    storage: multerConfig
-})
 
-const books = [];
-
-app.get("/api/books", (req, res) => {
-    res.json(books);
-});
-// upload.fields({name: 'cover', maxCount: 1}, {name: 'subcover', maxCount: 2})
-// upload.array('cover', 8)
-app.post("/api/books", upload.single('cover'), async (req, res) => {
-    const { path: tempUpload, originalname } = req.file;
-    const resultUpload = path.join(bookDir, originalname);
-    await fs.rename(tempUpload, resultUpload);
-    const cover = path.join('books', originalname);
-    const newBook = {
-        id: crypto.randomUUID(),
-        ...req.body,
-        cover
-    };
-    books.push(newBook);
-    res.status(201).json(newBook);
+app.use((err, req, res, next) => {
+  const { status = 500, message = "Server error" } = err;
+  res.status(status).json({ message });
 });
 
-app.listen(3000)
+
+mongoose.connect(DB_HOST).then(() => {
+  console.log("Database connection successful");
+  app.listen(PORT, () => {
+  console.log(`Server is running. Use our API on port: ${PORT}`);
+});
+}).catch((error) => {
+  console.error(error.message);
+  process.exit(1)
+});
