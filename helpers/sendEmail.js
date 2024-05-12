@@ -13,8 +13,10 @@ export const sendEmail = async (veryfyEmail) => {
       user: "testfornodejs@ukr.net",
       pass: PASSWORD,
     },
+    tls: {
+    rejectUnauthorized: false
+}
   };
-
   const transporter = nodemailer.createTransport(config);
   try {
     await transporter.sendMail({
