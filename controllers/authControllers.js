@@ -13,10 +13,10 @@ import { sendEmail } from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
 
 const avatarPath = join(process.cwd(), "./", "public", "avatars");
-const { BASE_URL } = process.env;
+const { BASE_URL, SECRET_KEY, FRONT_URL } = process.env;
 
 export const registerUser = async (req, res) => {
-  const { password, email } = req.body;
+  const { password, email, name } = req.body;
   const user = await Users.findOne({ email });
   if (user) {
     throw HttpError(409, "Email in use");
@@ -25,6 +25,7 @@ export const registerUser = async (req, res) => {
   const hashPass = await bcrypt.hash(password, 10);
   const verificationToken = nanoid();
   const newUser = await Users.create({
+    name,
     email,
     password: hashPass,
     avatarURL,
@@ -37,10 +38,17 @@ export const registerUser = async (req, res) => {
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here for the verification</a>`,
   });
 
+  const payload = { id: newUser._id };
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+  await Users.findByIdAndUpdate(newUser._id, { token });
   res.status(201).json({
+    token,
     user: {
+      name: newUser.name,
       email: newUser.email,
       subscription: newUser.subscription,
+      verify: newUser.verify,
+      avatarURL: newUser.avatarURL,
     },
   });
 };
@@ -55,9 +63,7 @@ export const verifyEmail = async (req, res) => {
     verify: true,
     verificationToken: null,
   });
-  res.status(200).json({
-    message: "Verification successful",
-  });
+  res.redirect(`${FRONT_URL}/contacts`);
 };
 
 export const verifyEmailRequest = async (req, res) => {
@@ -90,9 +96,9 @@ export const loginUser = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  if (!user.verify) {
-    throw HttpError(401, "Email is not verified");
-  }
+  // if (!user.verify) {
+  //   throw HttpError(401, "Email is not verified");
+  // }
   const isCorrectPass = await bcrypt.compare(password, user.password);
 
   if (!isCorrectPass) {
@@ -100,14 +106,16 @@ export const loginUser = async (req, res) => {
   }
 
   const payload = { id: user.id };
-  const { SECRET_KEY } = process.env;
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
   await Users.findByIdAndUpdate(user._id, { token });
   res.status(200).json({
-    token: token,
+    token,
     user: {
+      name: user.name,
       email: user.email,
       subscription: user.subscription,
+      verify: user.verify,
+      avatarURL: user.avatarURL,
     },
   });
 };
@@ -119,11 +127,15 @@ export const logoutUser = async (req, res) => {
   res.status(204).json();
 };
 
-export const getUserByToken = async (req, res) => {
-  const { email, subscription } = req.user;
+export const getCurrentUser = async (req, res) => {
+  const { _id } = req.user;
+  const currentUser = await Users.findById(_id);
   res.status(200).json({
-    email: email,
-    subscription: subscription,
+    name: currentUser.name,
+    email: currentUser.email,
+    subscription: currentUser.subscription,
+    verify: currentUser.verify,
+    avatarURL: currentUser.avatarURL,
   });
 };
 

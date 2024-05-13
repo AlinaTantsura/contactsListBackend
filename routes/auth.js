@@ -11,7 +11,7 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-  getUserByToken,
+  getCurrentUser,
   updateUserSubscription,
   updateAvatar,
   verifyEmail,
@@ -35,7 +35,7 @@ authRouter.post(
 );
 authRouter.post("/login", validateBody(loginSchema), ctrlWrapper(loginUser));
 authRouter.post("/logout", auth, ctrlWrapper(logoutUser));
-authRouter.get("/current", auth, ctrlWrapper(getUserByToken));
+authRouter.get("/current", auth, ctrlWrapper(getCurrentUser));
 authRouter.patch(
   "/",
   auth,
