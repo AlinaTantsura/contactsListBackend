@@ -10,12 +10,13 @@ export const getAllContacts = async (req, res) => {
     "owner",
     "email"
   );
+  const dataForResp = data.map(({ _id, name, phone, email, favorite}) => ({ "id": _id, name, phone, email, favorite }))
   if (favorite) {
-    const newdata = data.filter((contact) => contact.favorite === true);
+    const newdata = dataForResp.filter((contact) => contact.favorite === true);
     res.status(200).json(newdata);
   }
 
-  res.status(200).json(data);
+  res.status(200).json(dataForResp);
 };
 export const getOneContact = async (req, res) => {
   const { _id: owner } = req.user;
@@ -25,9 +26,15 @@ export const getOneContact = async (req, res) => {
     "email"
   );
   if (!data) {
-    throw HttpError(404, `User with id: ${id} not found`);
+    throw HttpError(404, `Contact with id: ${id} not found`);
   }
-  res.status(200).json(data);
+  res.status(200).json({
+    "id": data._id,
+    "name": data.name,
+    "phone": data.phone,
+    "email": data.email,
+    "favorite": data.favorite
+  });
 };
 
 export const deleteContact = async (req, res) => {
@@ -38,15 +45,21 @@ export const deleteContact = async (req, res) => {
     "email"
   );
   if (!data) {
-    throw HttpError(404);
+    throw HttpError(404, `Contact with id: ${id} not found`);
   }
-  res.status(200).json(data);
+  res.status(204)
 };
 
 export const createContact = async (req, res) => {
   const { _id: owner } = req.user;
   const contact = await Contacts.create({ ...req.body, owner });
-  res.status(201).json(contact);
+  res.status(201).json({
+    "id": contact._id,
+    "name": contact.name,
+    "phone": contact.phone,
+    "email": contact.email,
+    "favorite": contact.favorite
+  });
 };
 
 export const updateContact = async (req, res) => {
@@ -64,9 +77,15 @@ export const updateContact = async (req, res) => {
     new: true,
   });
   if (!contact) {
-    throw HttpError(404);
+    throw HttpError(404, `Contact with id: ${id} not found`);
   }
-  res.status(200).json(contact);
+  res.status(200).json({
+    "id": contact._id,
+    "name": contact.name,
+    "phone": contact.phone,
+    "email": contact.email,
+    "favorite": contact.favorite
+  });
 };
 
 export const updateStatusContact = async (req, res) => {
@@ -80,5 +99,11 @@ export const updateStatusContact = async (req, res) => {
   if (!contact) {
     throw HttpError(404);
   }
-  res.status(200).json(contact);
+  res.status(200).json({
+    "id": contact._id,
+    "name": contact.name,
+    "phone": contact.phone,
+    "email": contact.email,
+    "favorite": contact.favorite
+  });
 };

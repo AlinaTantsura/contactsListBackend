@@ -8,7 +8,6 @@ import { rename } from "fs/promises";
 import Jimp from "jimp";
 
 import { Users } from "../models/users.js";
-import { updateContact } from "./contactsControllers.js";
 import { sendEmail } from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
 
@@ -95,10 +94,7 @@ export const loginUser = async (req, res) => {
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
   }
-
-  // if (!user.verify) {
-  //   throw HttpError(401, "Email is not verified");
-  // }
+  
   const isCorrectPass = await bcrypt.compare(password, user.password);
 
   if (!isCorrectPass) {
@@ -144,10 +140,10 @@ export const updateUserSubscription = async (req, res) => {
   const updatedUser = await Users.findByIdAndUpdate(_id, req.body, {
     new: true,
   });
-  if (!updateContact) {
-    throw HttpError(404);
-  }
-  res.status(200).json(updatedUser);
+  res.status(200).json({
+    email: updatedUser.email,
+    subscription: updatedUser.subscription
+  });
 };
 
 export const updateAvatar = async (req, res) => {
