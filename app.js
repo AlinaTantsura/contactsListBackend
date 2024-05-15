@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from 'mongoose'
+import swaggerUi from "swagger-ui-express"
 
 import contactsRouter from "./routes/contactsRouter.js";
 import 'dotenv/config';
@@ -19,6 +20,7 @@ app.use(express.static("public"))
 
 app.use("/api/users", authRouter)
 app.use("/api/contacts", contactsRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup("./swagger.json"));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
