@@ -47,7 +47,7 @@ export const deleteContact = async (req, res) => {
   if (!data) {
     throw HttpError(404, `Contact with id: ${id} not found`);
   }
-  res.status(204)
+  res.status(204).json({})
 };
 
 export const createContact = async (req, res) => {

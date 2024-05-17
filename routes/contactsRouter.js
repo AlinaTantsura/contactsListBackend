@@ -20,7 +20,7 @@ contactsRouter.get("/", auth, ctrlWrapper(getAllContacts));
 
 contactsRouter.get("/:id", auth, isValidId, ctrlWrapper(getOneContact));
 
-contactsRouter.delete("/:id", auth, isValidId,  ctrlWrapper(deleteContact));
+contactsRouter.delete("/:id", auth, isValidId, ctrlWrapper(deleteContact));
 
 contactsRouter.post("/", auth, validateBody(createContactSchema), ctrlWrapper(createContact));
 
