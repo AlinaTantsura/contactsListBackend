@@ -146,23 +146,3 @@ export const updateUserSubscription = async (req, res) => {
   });
 };
 
-export const updateAvatar = async (req, res) => {
-  const { _id } = req.user;
-  if (!req.file) {
-    throw HttpError(400, "There is no file in request");
-  }
-  const { path: tempUpload, originalname } = req.file;
-  const image = await Jimp.read(tempUpload);
-  image.resize(250, 250);
-  image.write(tempUpload);
-
-  const filename = `${_id}_${originalname}`;
-  const resultUpload = join(avatarPath, filename);
-  await rename(tempUpload, resultUpload);
-  const avatarURL = join("avatars", filename);
-  await Users.findByIdAndUpdate(_id, { avatarURL });
-
-  res.json({
-    avatarURL,
-  });
-};

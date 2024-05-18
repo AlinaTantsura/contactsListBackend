@@ -13,12 +13,10 @@ import {
   logoutUser,
   getCurrentUser,
   updateUserSubscription,
-  updateAvatar,
   verifyEmail,
   verifyEmailRequest,
 } from "../controllers/authControllers.js";
 import { auth } from "../helpers/auth.js";
-import { upload } from "../helpers/upload.js";
 
 export const authRouter = express.Router();
 
@@ -41,10 +39,4 @@ authRouter.patch(
   auth,
   validateBody(updateSubscriptionSchema),
   ctrlWrapper(updateUserSubscription)
-);
-authRouter.patch(
-  "/avatars",
-  auth,
-  upload.single("avatar"),
-  ctrlWrapper(updateAvatar)
 );
