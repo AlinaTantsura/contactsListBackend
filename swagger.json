@@ -397,6 +397,42 @@
         ],
         "description": "Get all user's contacts",
         "operationId": "GetContacts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The number of needed page to return",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The numbers of items to return",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "favorite",
+            "in": "query",
+            "description": "To return only favorite contacts use \"true\"",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "All user's contacts",
